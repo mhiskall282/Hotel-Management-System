@@ -1,9 +1,13 @@
-FROM php:8.2-cli-alpine
+FROM php:8.2.35-cli-alpine
 
 # Install helper for fast PHP extension installations
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
 # Install system dependencies and required PHP extensions
+# PHP2Shell (CVE-2026-109618 & CVE-2026-109619) Core Mitigation
+RUN echo session.upload_progress.enabled = 0 > $PHP_INI_DIR/conf.d/security.ini \
+    && echo session.upload_progress.cleanup = 1 >> $PHP_INI_DIR/conf.d/security.ini
+
 RUN apk add --no-cache git curl nodejs npm sqlite \
     && install-php-extensions pdo_mysql pdo_sqlite gd zip intl opcache
 
